@@ -76,7 +76,7 @@ func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilt
 		tmpl *template.Template
 		err  error
 	)
-	if cfg.FQDNTemplate != "" {
+	if fqdnTemplate != "" {
 		tmpl, err = template.New("endpoint").Funcs(template.FuncMap{
 			"trimPrefix": strings.TrimPrefix,
 		}).Parse(fqdnTemplate)
@@ -87,7 +87,7 @@ func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilt
 
 	// Use shared informers to listen for add/update/delete of services/pods/nodes in the specified namespace.
 	// Set resync period to 0, to prevent processing when nothing has changed
-	informerFactory := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, 0, kubeinformers.WithNamespace(cfg.Namespace))
+	informerFactory := kubeinformers.NewSharedInformerFactoryWithOptions(kubeClient, 0, kubeinformers.WithNamespace(namespace))
 	serviceInformer := informerFactory.Core().V1().Services()
 	endpointsInformer := informerFactory.Core().V1().Endpoints()
 	podInformer := informerFactory.Core().V1().Pods()
@@ -136,7 +136,7 @@ func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilt
 	// Transform the slice into a map so it will
 	// be way much easier and fast to filter later
 	serviceTypes := make(map[string]struct{})
-	for _, serviceType := range cfg.ServiceTypeFilter {
+	for _, serviceType := range serviceTypeFilter {
 		serviceTypes[serviceType] = struct{}{}
 	}
 
