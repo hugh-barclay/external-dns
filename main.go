@@ -106,7 +106,7 @@ func main() {
 		Compatibility:                  cfg.Compatibility,
 		PublishInternal:                cfg.PublishInternal,
 		PublishHostIP:                  cfg.PublishHostIP,
-		CreateNodePortSRV:           	cfg.CreateNodePortSRV,
+		NodePortEnabled:           	    cfg.NodePortEnabled,
 		NodePortNodeRole:            	cfg.NodePortNodeRole,
 		AlwaysPublishNotReadyAddresses: cfg.AlwaysPublishNotReadyAddresses,
 		ConnectorServer:                cfg.ConnectorSourceServer,
