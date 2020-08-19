@@ -201,7 +201,7 @@ var defaultConfig = &Config{
 	PublishInternal:             false,
 	PublishHostIP:               false,
 	NodePortEnabled:             false,
-	NodePortNodeRole:            "node",
+	NodePortNodeRole:            "worker",
 	ConnectorSourceServer:       "localhost:8080",
 	Provider:                    "",
 	GoogleProject:               "",
