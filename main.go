@@ -117,7 +117,7 @@ func main() {
 		PublishInternal:                cfg.PublishInternal,
 		PublishHostIP:                  cfg.PublishHostIP,
 		NodePortEnabled:                cfg.NodePortEnabled,
-		NodePortNodeRole:               cfg.NodePortNodeRole,
+		NodePortSelector:               cfg.NodePortSelector,
 		AlwaysPublishNotReadyAddresses: cfg.AlwaysPublishNotReadyAddresses,
 		ConnectorServer:                cfg.ConnectorSourceServer,
 		CRDSourceAPIVersion:            cfg.CRDSourceAPIVersion,

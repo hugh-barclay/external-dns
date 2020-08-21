@@ -18,7 +18,6 @@ package source
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -59,7 +58,7 @@ type serviceSource struct {
 	publishInternal                bool
 	publishHostIP                  bool
 	nodePortEnabled                bool
-	nodePortNodeRole               string
+	nodePortLabels                 labels.Set
 	alwaysPublishNotReadyAddresses bool
 	serviceInformer                coreinformers.ServiceInformer
 	endpointsInformer              coreinformers.EndpointsInformer
@@ -72,6 +71,11 @@ type serviceSource struct {
 // NewServiceSource creates a new serviceSource with the given config.
 func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilter string, fqdnTemplate string, combineFqdnAnnotation bool, compatibility string, publishInternal bool, publishHostIP bool, alwaysPublishNotReadyAddresses bool, serviceTypeFilter []string, ignoreHostnameAnnotation bool, labelSelector labels.Selector, nodePortEnabled bool, nodePortSelector string) (Source, error) {
 	tmpl, err := parseTemplate(fqdnTemplate)
+	if err != nil {
+		return nil, err
+	}
+
+	nodePortLabels, err := labels.ConvertSelectorToLabelsMap(nodePortSelector)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +140,7 @@ func NewServiceSource(kubeClient kubernetes.Interface, namespace, annotationFilt
 		publishInternal:                publishInternal,
 		publishHostIP:                  publishHostIP,
 		nodePortEnabled:                nodePortEnabled,
-		nodePortNodeRole:               nodePortNodeRole,
+		nodePortLabels:                 nodePortLabels,
 		alwaysPublishNotReadyAddresses: alwaysPublishNotReadyAddresses,
 		serviceInformer:                serviceInformer,
 		endpointsInformer:              endpointsInformer,
@@ -593,15 +597,9 @@ func (sc *serviceSource) extractNodePortTargets(svc *v1.Service) (endpoint.Targe
 			}
 		}
 	default:
-		nodeSelectorKV := strings.Split(sc.nodePortNodeRole, "=")
-		if len(nodeSelectorKV) != 2 {
-			log.Errorf("Invalid role label format for NodePort selector (should be label=value): %s", sc.nodePortNodeRole)
-			return nil, errors.New("Invalid role label format for NodePort selector")
-		}
-		nodeSelector := labels.Set{nodeSelectorKV[0]: nodeSelectorKV[1]}
 		// Ensure we filter out the master from the list of nodes by only selecting
 		// nodes labeled with the "worker" role, not the "master" role
-		nodes, err = sc.nodeInformer.Lister().List(labels.SelectorFromSet(nodeSelector))
+		nodes, err = sc.nodeInformer.Lister().List(labels.SelectorFromSet(sc.nodePortLabels))
 		if err != nil {
 			return nil, err
 		}
